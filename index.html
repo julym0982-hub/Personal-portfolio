@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rowan Elliss | Full-Stack Developer</title>
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            primary: '#00d4ff',
+            secondary: '#7c3aed',
+            accent: '#06ffa5',
+            dark: '#050510',
+            card: '#0d0d1a',
+            border: '#1a1a2e',
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+            'slide-up': 'slideUp 0.8s ease forwards',
+            'typing': 'typing 3.5s steps(40,end), blink .75s step-end infinite',
+            'spin-slow': 'spin 8s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            glow: {
+              from: { textShadow: '0 0 10px #00d4ff, 0 0 20px #00d4ff' },
+              to: { textShadow: '0 0 20px #00d4ff, 0 0 40px #00d4ff, 0 0 60px #00d4ff' },
+            },
+            slideUp: {
+              from: { opacity: '0', transform: 'translateY(30px)' },
+              to: { opacity: '1', transform: 'translateY(0)' },
+            },
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: #050510; color: #e2e8f0; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #050510; }
+    ::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 2px; }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #00d4ff, #7c3aed, #06ffa5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Glow effects */
+    .glow-primary { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+    .glow-secondary { box-shadow: 0 0 20px rgba(124, 58, 237, 0.3); }
+    .text-glow { text-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
+
+    /* Grid background */
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* Card */
+    .glass-card {
+      background: rgba(13, 13, 26, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 212, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(0, 212, 255, 0.4);
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+      transform: translateY(-4px);
+    }
+
+    /* Skill bar */
+    .skill-bar-fill {
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #00d4ff, #7c3aed);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+      width: 0;
+      transition: width 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* Nav */
+    .nav-link {
+      position: relative;
+      color: #94a3b8;
+      transition: color 0.3s;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 2px;
+      background: #00d4ff;
+      transition: width 0.3s;
+    }
+    .nav-link:hover { color: #00d4ff; }
+    .nav-link:hover::after { width: 100%; }
+
+    /* Particle dots */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(0, 212, 255, 0.4);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    /* Cursor blink */
+    .cursor-blink::after {
+      content: '|';
+      animation: blink 1s step-end infinite;
+      color: #00d4ff;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Profile image glow */
+    .profile-ring {
+      background: conic-gradient(#00d4ff, #7c3aed, #06ffa5, #00d4ff);
+      animation: spin 4s linear infinite;
+    }
+
+    /* Section fade in */
+    .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* Button hover */
+    .btn-primary {
+      background: linear-gradient(135deg, #00d4ff, #7c3aed);
+      transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+    }
+
+    /* Service card icon */
+    .service-icon {
+      background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(124,58,237,0.1));
+      border: 1px solid rgba(0,212,255,0.2);
+    }
+  </style>
+</head>
+
+<body class="grid-bg min-h-screen overflow-x-hidden">
+
+  <!-- Particles -->
+  <div id="particles" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+  <!-- ═══════════════ NAVBAR ═══════════════ -->
+  <nav class="fixed top-0 w-full z-50 bg-opacity-80 bg-dark backdrop-blur-lg border-b border-border">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="font-mono text-lg font-bold gradient-text">&lt;Rowan /&gt;</a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#about"    class="nav-link text-sm font-medium">About</a>
+        <a href="#skills"   class="nav-link text-sm font-medium">Skills</a>
+        <a href="#services" class="nav-link text-sm font-medium">Services</a>
+        <a href="#contact"  class="nav-link text-sm font-medium">Contact</a>
+      </div>
+      <a href="https://t.me/rowanelliss" target="_blank"
+         class="btn-primary text-white text-sm font-semibold px-5 py-2 rounded-full flex items-center gap-2">
+        <i class="fab fa-telegram"></i> Hire Me
+      </a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section id="hero" class="relative min-h-screen flex items-center justify-center pt-20">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+
+      <!-- Text -->
+      <div class="z-10">
+        <div class="font-mono text-primary text-sm mb-4 tracking-widest opacity-80">
+          &gt; Hello, World! 👋
+        </div>
+        <h1 class="text-4xl md:text-6xl font-black leading-tight mb-2">
+          HI THERE!<br>
+          <span class="gradient-text">I'M ROWAN</span><br>
+          <span class="text-white">ELLISS</span>
+        </h1>
+        <div class="text-xl md:text-2xl text-primary font-semibold mb-4 text-glow cursor-blink" id="typewriter">
+          Full-Stack Developer &amp; Telegram Mini App Expert
+        </div>
+        <p class="text-slate-400 text-lg leading-relaxed mb-8 max-w-lg">
+          Transforming ideas into reality with <span class="text-accent font-semibold">Telegram Mini Apps</span>
+          and modern <span class="text-primary font-semibold">Full-stack Websites</span>.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="https://t.me/rowanelliss" target="_blank"
+             class="btn-primary text-white font-bold px-8 py-3 rounded-full flex items-center gap-2">
+            <i class="fab fa-telegram text-lg"></i> Let's Connect
+          </a>
+          <a href="#about"
+             class="border border-primary text-primary font-bold px-8 py-3 rounded-full hover:bg-primary hover:text-dark transition-all">
+            About Me
+          </a>
+        </div>
+
+        <!-- Quick stats -->
+        <div class="flex gap-8 mt-10">
+          <div>
+            <div class="text-3xl font-black text-primary text-glow">20+</div>
+            <div class="text-xs text-slate-500 mt-1">Projects Delivered</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black gradient-text">95%</div>
+            <div class="text-xs text-slate-500 mt-1">Client Satisfaction</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-accent text-glow">3+</div>
+            <div class="text-xs text-slate-500 mt-1">Years Experience</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Image -->
+      <div class="flex justify-center z-10">
+        <div class="relative animate-float">
+          <!-- Spinning ring -->
+          <div class="w-72 h-72 md:w-80 md:h-80 profile-ring rounded-full p-1">
+            <div class="w-full h-full rounded-full overflow-hidden bg-card border-4 border-dark">
+              <img src="assets/profile.jpg" alt="Rowan Elliss"
+                   class="w-full h-full object-cover" />
+            </div>
+          </div>
+          <!-- Floating badges -->
+          <div class="absolute -top-2 -right-2 bg-card border border-primary rounded-xl px-3 py-1 text-xs font-mono text-primary glow-primary">
+            Node.js ⚡
+          </div>
+          <div class="absolute -bottom-2 -left-2 bg-card border border-secondary rounded-xl px-3 py-1 text-xs font-mono text-secondary glow-secondary">
+            Telegram 🤖
+          </div>
+          <div class="absolute top-1/2 -right-8 bg-card border border-accent rounded-xl px-3 py-1 text-xs font-mono text-accent">
+            Socket.io 🔌
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-center">
+      <div class="text-slate-500 text-xs mb-2">Scroll Down</div>
+      <div class="w-5 h-9 border-2 border-slate-600 rounded-full mx-auto flex justify-center pt-1">
+        <div class="w-1 h-2 bg-primary rounded-full animate-bounce"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ ABOUT ═══════════════ -->
+  <section id="about" class="py-24 relative">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16 fade-in">
+        <div class="font-mono text-primary text-sm tracking-widest mb-2">// WHO I AM</div>
+        <h2 class="text-4xl font-black gradient-text">About Me</h2>
+        <div class="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-4 rounded-full"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <!-- Code block -->
+        <div class="glass-card rounded-2xl p-6 font-mono text-sm fade-in">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            <span class="text-slate-500 text-xs ml-2">about.js</span>
+          </div>
+          <div class="text-slate-400 leading-8 text-xs md:text-sm">
+            <span class="text-secondary">const</span>
+            <span class="text-white"> rowan </span>
+            <span class="text-primary">=</span>
+            <span class="text-white"> {</span><br>
+            &nbsp;&nbsp;<span class="text-accent">name</span><span class="text-white">:</span>
+            <span class="text-orange-400"> "Rowan Elliss"</span><span class="text-white">,</span><br>
+            &nbsp;&nbsp;<span class="text-accent">age</span><span class="text-white">:</span>
+            <span class="text-primary"> 20</span><span class="text-white">,</span><br>
+            &nbsp;&nbsp;<span class="text-accent">role</span><span class="text-white">:</span>
+            <span class="text-orange-400"> "Full-Stack Developer"</span><span class="text-white">,</span><br>
+            &nbsp;&nbsp;<span class="text-accent">specialty</span><span class="text-white">:</span>
+            <span class="text-orange-400"> "Telegram Ecosystem"</span><span class="text-white">,</span><br>
+            &nbsp;&nbsp;<span class="text-accent">stack</span><span class="text-white">: [</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-orange-400">"Node.js"</span><span class="text-white">,</span>
+            <span class="text-orange-400"> "Socket.io"</span><span class="text-white">,</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-orange-400">"MongoDB"</span><span class="text-white">,</span>
+            <span class="text-orange-400"> "Telegram API"</span><br>
+            &nbsp;&nbsp;<span class="text-white">],</span><br>
+            &nbsp;&nbsp;<span class="text-accent">available</span><span class="text-white">:</span>
+            <span class="text-green-400"> true</span><br>
+            <span class="text-white">};</span>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div class="fade-in">
+          <h3 class="text-2xl font-bold text-white mb-4">
+            Building the <span class="text-primary">Future</span> of Telegram
+          </h3>
+          <p class="text-slate-400 leading-relaxed mb-6">
+            I am Rowan Elliss, a Full-Stack Developer specializing in the
+            <span class="text-primary font-semibold">Telegram Ecosystem</span>.
+            At 20, I focus on building scalable web apps and interactive Mini Apps
+            using <span class="text-accent font-semibold">Node.js</span>,
+            <span class="text-accent font-semibold">Socket.io</span>, and
+            <span class="text-accent font-semibold">MongoDB</span>.
+          </p>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-xl p-4 text-center">
+              <i class="fas fa-robot text-2xl text-primary mb-2"></i>
+              <div class="text-white font-semibold text-sm">Telegram Expert</div>
+            </div>
+            <div class="glass-card rounded-xl p-4 text-center">
+              <i class="fas fa-server text-2xl text-secondary mb-2"></i>
+              <div class="text-white font-semibold text-sm">Backend Dev</div>
+            </div>
+            <div class="glass-card rounded-xl p-4 text-center">
+              <i class="fas fa-bolt text-2xl text-accent mb-2"></i>
+              <div class="text-white font-semibold text-sm">Real-Time Apps</div>
+            </div>
+            <div class="glass-card rounded-xl p-4 text-center">
+              <i class="fas fa-shield-alt text-2xl text-yellow-400 mb-2"></i>
+              <div class="text-white font-semibold text-sm">Cybersecurity</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SKILLS ═══════════════ -->
+  <section id="skills" class="py-24 relative">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-16 fade-in">
+        <div class="font-mono text-primary text-sm tracking-widest mb-2">// WHAT I KNOW</div>
+        <h2 class="text-4xl font-black gradient-text">My Skills</h2>
+        <div class="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-4 rounded-full"></div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-8 fade-in" id="skills-container">
+        <div class="space-y-8" id="skills-list">
+          <!-- Skills rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SERVICES ═══════════════ -->
+  <section id="services" class="py-24 relative">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16 fade-in">
+        <div class="font-mono text-primary text-sm tracking-widest mb-2">// WHAT I DO</div>
+        <h2 class="text-4xl font-black gradient-text">Services</h2>
+        <div class="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-4 rounded-full"></div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <!-- Service 1 -->
+        <div class="glass-card rounded-2xl p-8 text-center fade-in group">
+          <div class="service-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+            <i class="fab fa-telegram text-3xl text-primary"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Telegram Mini Apps</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Feature-rich, interactive Telegram Mini Apps with seamless UX,
+            payment integration, and WebApp APIs for maximum engagement.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-2 justify-center">
+            <span class="text-xs bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full border border-primary border-opacity-20">WebApp API</span>
+            <span class="text-xs bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full border border-primary border-opacity-20">Telegraf</span>
+          </div>
+        </div>
+
+        <!-- Service 2 -->
+        <div class="glass-card rounded-2xl p-8 text-center fade-in group">
+          <div class="service-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+            <i class="fas fa-server text-3xl text-secondary"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Backend &amp; API Dev</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Scalable REST APIs and microservices with Node.js, Express,
+            and MongoDB — built for performance, security, and reliability.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-2 justify-center">
+            <span class="text-xs bg-secondary bg-opacity-10 text-secondary px-3 py-1 rounded-full border border-secondary border-opacity-20">Node.js</span>
+            <span class="text-xs bg-secondary bg-opacity-10 text-secondary px-3 py-1 rounded-full border border-secondary border-opacity-20">MongoDB</span>
+          </div>
+        </div>
+
+        <!-- Service 3 -->
+        <div class="glass-card rounded-2xl p-8 text-center fade-in group">
+          <div class="service-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+            <i class="fas fa-bolt text-3xl text-accent"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Real-Time Applications</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Live dashboards, chat systems, and real-time games powered by
+            Socket.io with sub-100ms latency and horizontal scaling.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-2 justify-center">
+            <span class="text-xs bg-accent bg-opacity-10 text-accent px-3 py-1 rounded-full border border-accent border-opacity-20">Socket.io</span>
+            <span class="text-xs bg-accent bg-opacity-10 text-accent px-3 py-1 rounded-full border border-accent border-opacity-20">WebSocket</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CONTACT ═══════════════ -->
+  <section id="contact" class="py-24 relative">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-16 fade-in">
+        <div class="font-mono text-primary text-sm tracking-widest mb-2">// GET IN TOUCH</div>
+        <h2 class="text-4xl font-black gradient-text">Contact Me</h2>
+        <div class="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-4 rounded-full"></div>
+        <p class="text-slate-400 mt-4">Have a project in mind? Let's build something amazing together.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 fade-in">
+        <!-- Telegram -->
+        <a href="https://t.me/rowanelliss" target="_blank"
+           class="glass-card rounded-2xl p-8 flex items-center gap-6 group cursor-pointer">
+          <div class="w-16 h-16 bg-blue-500 bg-opacity-10 border border-blue-500 border-opacity-20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fab fa-telegram text-3xl text-blue-400"></i>
+          </div>
+          <div>
+            <div class="text-slate-400 text-sm mb-1">Chat on Telegram</div>
+            <div class="text-white font-bold text-lg">@rowanelliss</div>
+            <div class="text-primary text-xs mt-1">Usually replies within minutes →</div>
+          </div>
+        </a>
+
+        <!-- Email -->
+        <a href="mailto:rowanelliss@gmail.com"
+           class="glass-card rounded-2xl p-8 flex items-center gap-6 group cursor-pointer">
+          <div class="w-16 h-16 bg-primary bg-opacity-10 border border-primary border-opacity-20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <i class="fas fa-envelope text-3xl text-primary"></i>
+          </div>
+          <div>
+            <div class="text-slate-400 text-sm mb-1">Send an Email</div>
+            <div class="text-white font-bold text-lg">rowanelliss@gmail.com</div>
+            <div class="text-primary text-xs mt-1">For detailed project inquiries →</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- CTA -->
+      <div class="text-center mt-12 fade-in">
+        <a href="https://t.me/rowanelliss" target="_blank"
+           class="btn-primary text-white font-bold px-12 py-4 rounded-full text-lg inline-flex items-center gap-3">
+          <i class="fab fa-telegram text-xl"></i>
+          Start a Project
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="border-t border-border py-8 text-center">
+    <p class="font-mono text-slate-500 text-sm">
+      &lt;/ Built with ❤️ by
+      <span class="text-primary">Rowan Elliss</span>
+      &gt;
+    </p>
+    <p class="text-slate-600 text-xs mt-2">© 2025 All rights reserved.</p>
+  </footer>
+
+
+  <!-- ═══════════════ SCRIPTS ═══════════════ -->
+  <script>
+    // ─── CONFIG ───────────────────────────────────────────
+    const BACKEND_URL = 'https://YOUR_RENDER_APP.onrender.com'; // ← Change this after deploy
+
+    // ─── SKILLS DATA ──────────────────────────────────────
+    const skills = [
+      { name: 'Node.js & Express',        pct: 95, color: '#00d4ff' },
+      { name: 'Telegram Bot API',         pct: 95, color: '#7c3aed' },
+      { name: 'Socket.io',               pct: 90, color: '#06ffa5' },
+      { name: 'JavaScript',              pct: 90, color: '#f59e0b' },
+      { name: 'MongoDB',                 pct: 85, color: '#00d4ff' },
+      { name: 'Cybersecurity/Obfuscation', pct: 80, color: '#ef4444' },
+    ];
+
+    // ─── RENDER SKILLS ─────────────────────────────────────
+    const skillsList = document.getElementById('skills-list');
+    skills.forEach(skill => {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-white font-semibold">${skill.name}</span>
+          <span class="text-sm font-mono font-bold" style="color:${skill.color}">${skill.pct}%</span>
+        </div>
+        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div class="skill-bar-fill" data-width="${skill.pct}" style="background: linear-gradient(90deg, ${skill.color}, ${skill.color}88)"></div>
+        </div>
+      `;
+      skillsList.appendChild(div);
+    });
+
+    // ─── PARTICLES ─────────────────────────────────────────
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 4 + 1;
+      p.style.cssText = `
+        width: ${size}px; height: ${size}px;
+        left: ${Math.random() * 100}%;
+        top: ${Math.random() * 100}%;
+        opacity: ${Math.random() * 0.5 + 0.1};
+        animation-delay: ${Math.random() * 6}s;
+        animation-duration: ${Math.random() * 4 + 4}s;
+      `;
+      container.appendChild(p);
+    }
+
+    // ─── INTERSECTION OBSERVER ─────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+
+          // Animate skill bars when section visible
+          if (entry.target.id === 'skills-container') {
+            setTimeout(() => {
+              document.querySelectorAll('.skill-bar-fill').forEach(bar => {
+                bar.style.width = bar.dataset.width + '%';
+              });
+            }, 200);
+          }
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.fade-in, #skills-container').forEach(el => observer.observe(el));
+
+    // ─── TELEGRAM VISITOR TRACKING ─────────────────────────
+    async function trackVisitor() {
+      try {
+        const tg = window.Telegram?.WebApp;
+        let visitorData = {
+          source:    'direct',
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+        };
+
+        if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+          const user = tg.initDataUnsafe.user;
+          visitorData = {
+            ...visitorData,
+            source:    'telegram',
+            tgId:      user.id,
+            firstName: user.first_name || '',
+            lastName:  user.last_name  || '',
+            username:  user.username   || '',
+            langCode:  user.language_code || '',
+          };
+
+          // Expand Telegram WebApp
+          tg.expand();
+          tg.enableClosingConfirmation?.();
+        }
+
+        // Send to backend
+        const res = await fetch(`${BACKEND_URL}/api/track`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(visitorData),
+        });
+
+        if (res.ok) {
+          console.log('[Tracker] Visitor tracked successfully.');
+        }
+      } catch (err) {
+        // Silent fail — never break the user experience
+        console.warn('[Tracker] Could not track visitor:', err.message);
+      }
+    }
+
+    // Run tracking on page load
+    document.addEventListener('DOMContentLoaded', trackVisitor);
+
+    // ─── NAVBAR SCROLL ─────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      const nav = document.querySelector('nav');
+      nav.style.backgroundColor = window.scrollY > 50
+        ? 'rgba(5,5,16,0.95)'
+        : 'rgba(5,5,16,0.8)';
+    });
+  </script>
+</body>
+</html>
