@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="theme-color" content="#050510"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="description" content="Rowan Elliss — Full-Stack Developer &amp; Telegram Mini App Expert"/>
@@ -18,19 +19,45 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.0/css/all.css"/>
+  <!-- Font Awesome (with CORS fix) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous"
+    onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css'"/>
 
-  <!-- GSAP -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <!-- Lenis Smooth Scroll -->
-  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
-
-  <!-- tsParticles -->
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+  <!-- GSAP with fallback CDN -->
+  <script>
+    function loadScript(urls, cb) {
+      var i = 0;
+      function tryNext() {
+        if (i >= urls.length) { if(cb) cb(false); return; }
+        var s = document.createElement('script');
+        s.src = urls[i++];
+        s.onload = function(){ if(cb) cb(true); };
+        s.onerror = tryNext;
+        document.head.appendChild(s);
+      }
+      tryNext();
+    }
+    // Load GSAP
+    loadScript([
+      'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js',
+      'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js'
+    ], function(ok){ window._gsapLoaded = ok; });
+    // Load GSAP ScrollTrigger
+    loadScript([
+      'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js',
+      'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js'
+    ]);
+    // Load Lenis
+    loadScript([
+      'https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js',
+      'https://unpkg.com/@studio-freight/lenis@1.0.42/bundled/lenis.min.js'
+    ]);
+    // Load tsParticles
+    loadScript([
+      'https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js',
+      'https://unpkg.com/tsparticles@2.12.0/tsparticles.bundle.min.js'
+    ]);
+  </script>
 
   <script>
     tailwind.config = {
@@ -334,6 +361,34 @@
     /* ── Scroll bounce / fadeIn ── */
     @keyframes scrollBounce { 0%,100%{transform:translateY(0);opacity:1} 50%{transform:translateY(6px);opacity:0.5} }
     @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Preloader CSS fallback (no-GSAP) ── */
+    @keyframes preloaderBarFill { from{width:0%} to{width:100%} }
+    @keyframes preloaderFadeUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes preloaderExit    { 0%{transform:translateY(0)} 100%{transform:translateY(-100%)} }
+
+    #preloader.css-animate .pre-bar {
+      animation: preloaderBarFill 1.8s ease-out forwards;
+    }
+    #preloader.css-animate .pre-logo {
+      animation: preloaderFadeUp 0.7s 0.2s ease-out forwards;
+      opacity: 0;
+    }
+    #preloader.css-animate .pre-left {
+      animation: preloaderFadeUp 0.7s 0.6s ease-out forwards;
+      opacity: 0; transform: none;
+    }
+    #preloader.css-animate .pre-right {
+      animation: preloaderFadeUp 0.7s 0.8s ease-out forwards;
+      opacity: 0; transform: none;
+    }
+    #preloader.css-animate .pre-sub {
+      animation: preloaderFadeUp 0.6s 1.2s ease-out forwards;
+      opacity: 0;
+    }
+    #preloader.exit-animate {
+      animation: preloaderExit 0.9s 2.8s cubic-bezier(0.76,0,0.24,1) forwards;
+    }
 
     /* ── Particles ── */
     #tsparticles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
@@ -959,85 +1014,110 @@
     setTimeout(() => t.classList.remove('show'), 3500);
   }
 
-  /* ── GSAP Preloader ── */
+  /* ── Safe library wrappers ── */
+  function safeGsap(fn) { try { if (typeof gsap !== 'undefined') fn(); } catch(e){} }
+  function safeScrollTrigger(fn) { try { if (typeof ScrollTrigger !== 'undefined') fn(); } catch(e){} }
+
+  /* ── PRELOADER — works with OR without GSAP ── */
   window.addEventListener('load', () => {
-    const tl = gsap.timeline({
-      onComplete: () => {
-        gsap.to('#preloader', {
-          yPercent: -100,
-          duration: 1,
-          ease: 'power4.inOut',
-          onComplete: () => {
-            document.getElementById('preloader').style.display = 'none';
-            document.body.style.overflow = '';
-            initReveal();
-          }
-        });
-      }
-    });
-
     document.body.style.overflow = 'hidden';
+    const preloader = document.getElementById('preloader');
 
-    tl.to('#pre-bar', { width: '100%', duration: 1.6, ease: 'power2.inOut' }, 0)
-      .to('#pre-logo', { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(1.7)' }, 0.2)
-      .to('#pre-left',  { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 0.6)
-      .to('#pre-right', { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 0.8)
-      .to('#pre-sub',   { opacity: 1, duration: 0.6, ease: 'power2.out' }, 1.2)
-      .to('#pre-logo',  { scale: 1.1, duration: 0.3, ease: 'power1.inOut', yoyo: true, repeat: 1 }, 1.5)
-      .to(['#pre-left','#pre-right'], { letterSpacing: '0.15em', duration: 0.3, ease: 'power1.inOut' }, 1.7)
-      .to(['#pre-left','#pre-right'], { opacity: 0, y: -30, duration: 0.4, stagger: 0.1, ease: 'power2.in' }, 2.1)
-      .to('#pre-logo',  { opacity: 0, scale: 0.5, duration: 0.4, ease: 'power2.in' }, 2.2)
-      .to('#pre-sub',   { opacity: 0, duration: 0.3, ease: 'power2.in' }, 2.2);
+    function hidePreloader() {
+      document.body.style.overflow = '';
+      if (preloader) {
+        preloader.style.transition = 'transform 0.9s cubic-bezier(0.76,0,0.24,1)';
+        preloader.style.transform  = 'translateY(-100%)';
+        setTimeout(() => {
+          if (preloader) preloader.style.display = 'none';
+          initReveal();
+        }, 950);
+      }
+    }
+
+    if (typeof gsap !== 'undefined') {
+      /* GSAP path */
+      const tl = gsap.timeline({ onComplete: hidePreloader });
+      tl.to('#pre-bar',   { width: '100%', duration: 1.6, ease: 'power2.inOut' }, 0)
+        .to('#pre-logo',  { opacity: 1, y: 0, duration: 0.7, ease: 'back.out(1.7)' }, 0.2)
+        .to('#pre-left',  { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 0.6)
+        .to('#pre-right', { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 0.8)
+        .to('#pre-sub',   { opacity: 1, duration: 0.6, ease: 'power2.out' }, 1.2)
+        .to('#pre-logo',  { scale: 1.1, duration: 0.3, ease: 'power1.inOut', yoyo: true, repeat: 1 }, 1.5)
+        .to(['#pre-left','#pre-right'], { letterSpacing: '0.15em', duration: 0.3, ease: 'power1.inOut' }, 1.7)
+        .to(['#pre-left','#pre-right'], { opacity: 0, y: -30, duration: 0.4, stagger: 0.1, ease: 'power2.in' }, 2.1)
+        .to('#pre-logo',  { opacity: 0, scale: 0.5, duration: 0.4, ease: 'power2.in' }, 2.2)
+        .to('#pre-sub',   { opacity: 0, duration: 0.3, ease: 'power2.in' }, 2.2);
+    } else {
+      /* CSS fallback path — no GSAP needed */
+      preloader.classList.add('css-animate');
+      preloader.classList.add('exit-animate');
+      setTimeout(() => {
+        hidePreloader();
+      }, 3800);
+    }
+
+    /* ── Safety net: always hide after 6s no matter what ── */
+    setTimeout(() => {
+      if (preloader && preloader.style.display !== 'none') {
+        preloader.style.display = 'none';
+        document.body.style.overflow = '';
+        try { initReveal(); } catch(e){}
+      }
+    }, 6000);
   });
 
   /* ── Scroll reveal ── */
   function initReveal() {
-    gsap.registerPlugin(ScrollTrigger);
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
 
-    document.querySelectorAll('.reveal').forEach(el => {
-      gsap.fromTo(el,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: el, start: 'top 85%', once: true }
-        }
+      document.querySelectorAll('.reveal').forEach(el => {
+        gsap.fromTo(el,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 85%', once: true } }
+        );
+      });
+
+      gsap.fromTo('.skill-card',
+        { opacity: 0, y: 30, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.08, ease: 'power3.out',
+          scrollTrigger: { trigger: '#skills', start: 'top 70%', once: true } }
       );
-    });
 
-    /* Skill cards stagger */
-    gsap.fromTo('.skill-card',
-      { opacity: 0, y: 30, scale: 0.95 },
-      {
-        opacity: 1, y: 0, scale: 1,
-        duration: 0.6, stagger: 0.08, ease: 'power3.out',
-        scrollTrigger: { trigger: '#skills', start: 'top 70%', once: true }
-      }
-    );
+      gsap.fromTo('#hero-left',  { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 1.1, ease: 'power3.out', delay: 0.2 });
+      gsap.fromTo('#hero-right', { opacity: 0, x:  60 }, { opacity: 1, x: 0, duration: 1.1, ease: 'power3.out', delay: 0.4 });
 
-    /* Hero entrance */
-    gsap.fromTo('#hero-left', { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 1.1, ease: 'power3.out', delay: 0.2 });
-    gsap.fromTo('#hero-right', { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 1.1, ease: 'power3.out', delay: 0.4 });
-
-    /* Navbar scroll effect */
-    ScrollTrigger.create({
-      start: 'top -80',
-      onUpdate: (self) => {
-        document.getElementById('navbar').style.boxShadow =
-          self.progress > 0 ? '0 8px 32px rgba(0,212,255,0.08)' : 'none';
-      }
-    });
+      ScrollTrigger.create({
+        start: 'top -80',
+        onUpdate: (self) => {
+          document.getElementById('navbar').style.boxShadow =
+            self.progress > 0 ? '0 8px 32px rgba(0,212,255,0.08)' : 'none';
+        }
+      });
+    } else {
+      /* CSS fallback reveals */
+      document.querySelectorAll('.reveal, .skill-card, #hero-left, #hero-right').forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      });
+    }
   }
 
   /* ── Scroll progress bar ── */
   window.addEventListener('scroll', () => {
     const pct = (scrollY / (document.documentElement.scrollHeight - innerHeight)) * 100;
-    document.getElementById('scroll-progress').style.width = pct + '%';
+    const bar = document.getElementById('scroll-progress');
+    if (bar) bar.style.width = pct + '%';
   });
 
   /* ── Typewriter ── */
   (function() {
     const phrases = ['Full-Stack Developer', 'Telegram Mini App Expert', 'Web Developer', 'Backend Engineer'];
     const el = document.getElementById('typewriter-text');
+    if (!el) return;
     let pi = 0, ci = 0, del = false;
     function type() {
       const cur = phrases[pi];
@@ -1054,42 +1134,48 @@
     setTimeout(type, 1000);
   })();
 
-  /* ── Lenis smooth scroll ── */
-  const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
-  function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
-  requestAnimationFrame(raf);
+  /* ── Lenis smooth scroll (optional) ── */
+  try {
+    if (typeof Lenis !== 'undefined') {
+      const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+      function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+      requestAnimationFrame(raf);
+    }
+  } catch(e) { /* skip if Lenis not loaded */ }
 
-  /* ── tsParticles ── */
-  tsParticles.load('tsparticles', {
-    background: { color: { value: 'transparent' } },
-    fpsLimit: 60,
-    particles: {
-      number: { value: 50, density: { enable: true, area: 900 } },
-      color: { value: ['#00d4ff','#7c3aed','#06ffa5'] },
-      opacity: { value: { min: 0.05, max: 0.25 }, animation: { enable: true, speed: 0.8, minimumValue: 0.05 } },
-      size: { value: { min: 1, max: 3 } },
-      move: { enable: true, speed: 0.5, direction: 'none', random: true, straight: false, outModes: 'out' },
-      links: { enable: true, distance: 140, color: '#00d4ff', opacity: 0.06, width: 1 },
-    },
-    interactivity: {
-      events: { onHover: { enable: true, mode: 'grab' } },
-      modes: { grab: { distance: 180, links: { opacity: 0.2 } } }
-    },
-    detectRetina: true,
-  });
-
-  /* Profile image embedded inline — no fetch needed */
+  /* ── tsParticles (optional) ── */
+  try {
+    if (typeof tsParticles !== 'undefined') {
+      tsParticles.load('tsparticles', {
+        background: { color: { value: 'transparent' } },
+        fpsLimit: 60,
+        particles: {
+          number: { value: 50, density: { enable: true, area: 900 } },
+          color: { value: ['#00d4ff','#7c3aed','#06ffa5'] },
+          opacity: { value: { min: 0.05, max: 0.25 }, animation: { enable: true, speed: 0.8, minimumValue: 0.05 } },
+          size: { value: { min: 1, max: 3 } },
+          move: { enable: true, speed: 0.5, direction: 'none', random: true, straight: false, outModes: 'out' },
+          links: { enable: true, distance: 140, color: '#00d4ff', opacity: 0.06, width: 1 },
+        },
+        interactivity: {
+          events: { onHover: { enable: true, mode: 'grab' } },
+          modes:  { grab: { distance: 180, links: { opacity: 0.2 } } }
+        },
+        detectRetina: true,
+      });
+    }
+  } catch(e) { /* skip if tsParticles not loaded */ }
 
   /* ── Mobile menu ── */
-  document.getElementById('open-menu').onclick = () => document.getElementById('mobile-menu').classList.add('open');
+  document.getElementById('open-menu').onclick  = () => document.getElementById('mobile-menu').classList.add('open');
   document.getElementById('close-menu').onclick = () => document.getElementById('mobile-menu').classList.remove('open');
   function closeMobileMenu() { document.getElementById('mobile-menu').classList.remove('open'); }
 
   /* ── Contact form (FormSubmit) ── */
   document.getElementById('contact-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const btn = document.getElementById('cf-submit');
-    const txt = document.getElementById('cf-btn-text');
+    const btn  = document.getElementById('cf-submit');
+    const txt  = document.getElementById('cf-btn-text');
     const name    = document.getElementById('cf-name').value.trim();
     const email   = document.getElementById('cf-email').value.trim();
     const subject = document.getElementById('cf-subject').value.trim() || 'New Portfolio Message';
@@ -1103,16 +1189,15 @@
 
     try {
       const fd = new FormData();
-      fd.append('name', name);
-      fd.append('email', email);
-      fd.append('_subject', subject);
-      fd.append('message', message);
-      fd.append('_captcha', 'false');
+      fd.append('name',      name);
+      fd.append('email',     email);
+      fd.append('_subject',  subject);
+      fd.append('message',   message);
+      fd.append('_captcha',  'false');
       fd.append('_template', 'table');
 
       await fetch('https://formsubmit.co/koedjdyud@gmail.com', { method: 'POST', body: fd });
-
-      showToast('✅ Message sent! I\'ll reply soon.', 'success');
+      showToast("✅ Message sent! I'll reply soon.", 'success');
       e.target.reset();
     } catch (err) {
       showToast('❌ Failed to send. Try Telegram directly.', 'error');
@@ -1123,7 +1208,7 @@
     }
   });
 
-/* scrollBounce and fadeInUp defined in <style> */
+  /* Profile image embedded inline — no fetch needed */
 </script>
 
 </body>
