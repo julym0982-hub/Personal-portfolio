@@ -196,8 +196,7 @@ p.lift-hover:hover{transform:translateY(-4px);text-shadow:0 8px 20px rgba(0,212,
 @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
 
 /* ── Profile ring ── */
-@keyframes ringRotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-.ring-spin{background:conic-gradient(#00d4ff,#7c3aed,#06ffa5,#ff3366,#00d4ff);animation:ringRotate 4s linear infinite;}
+.ring-spin{background:conic-gradient(#00d4ff,#7c3aed,#06ffa5,#ff3366,#00d4ff);}
 
 /* ── Skill card ── */
 .skill-card{
@@ -378,7 +377,7 @@ nav,section,footer{position:relative;z-index:1;}
       </div>
 
       <!-- Right – Profile -->
-      <div class="flex justify-center order-1 lg:order-2 float-anim gsap-hidden" id="hero-right" data-reveal="fade">
+      <div class="flex justify-center order-1 lg:order-2 gsap-hidden" id="hero-right" data-reveal="fade">
         <div class="relative" id="badge-container">
           <div class="ring-spin rounded-full p-[3px]" style="width:300px;height:300px;">
             <div class="w-full h-full rounded-full overflow-hidden" style="background:#050510;border:4px solid #050510;">
@@ -615,7 +614,7 @@ nav,section,footer{position:relative;z-index:1;}
             </div>
             <div class="contact-info-item">
               <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);"><svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
-              <div><div class="text-slate-400 text-xs mb-0.5">Email</div><button onclick="openLink('mailto:koedjdyud@gmail.com')" class="text-white font-semibold text-sm hover:text-primary transition-colors lift-hover">koedjdyud@gmail.com</button></div>
+              <div><div class="text-slate-400 text-xs mb-0.5">Email</div><button onclick="openLink('mailto:koedjdyud@gmail.com')" class="text-white font-semibold text-sm hover:text-primary transition-colors lift-hover"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cfa4a0aaaba5abb6baab8fa8a2aea6a3e1aca0a2">[email&#160;protected]</a></button></div>
             </div>
             <div class="contact-info-item">
               <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(6,255,165,0.1);border:1px solid rgba(6,255,165,0.2);"><svg class="w-5 h-5" style="color:#06ffa5;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
@@ -656,7 +655,7 @@ nav,section,footer{position:relative;z-index:1;}
 
 
 <!-- ════════ JS ════════ -->
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ════════════════════════════════════════
    HELPERS
 ════════════════════════════════════════ */
@@ -1013,19 +1012,4 @@ function boot() {
 let bootAttempts = 0;
 function tryBoot() {
   bootAttempts++;
-  if (typeof gsap !== 'undefined' || bootAttempts > 30) {
-    boot();
-  } else {
-    setTimeout(tryBoot, 100);
-  }
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', tryBoot);
-} else {
-  tryBoot();
-}
-</script>
-
-</body>
-</html>
+  if (typeof gsap !== 'undefined' || 
